@@ -424,11 +424,11 @@ Note the substantially wider range includes our true value of 19.2.  With a pred
 ---
 class: left, middle, r-logo
 
-## Collinearity and Multi-collinearity
+## Collinearity
 
-These issues artifically inflate the variance of a dataset, which can render estimation inaccurate.
+*Collinearity* is when two inputs are highly correlated (eg &gt; 0.5).  This artifically inflates the variance of a dataset, which can render estimation inaccurate.
 
-*Collinearity* is when two inputs are highly correlated (eg &gt; 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be considered for removal:
+This can be identified with a simple `cor()` command and one of these inputs should be considered for removal:
 
 
 ```r
@@ -442,17 +442,72 @@ cor(advertising[ ,1:3 ])
 ## Newspaper 0.05664787 0.35410375 1.00000000
 ```
 
-*Multi-collinearity* is when more than two inputs are linearly related, and this may not be seen in a simple pairwise `cor()` command.  For this, you need to compute a *Variance Inflation Factor* (VIF) on a model with all your inputs and consider dropping inputs with a VIF greater than 5.
+---
+class: left, middle, r-logo
+
+## Multi-Collinearity (1/2)
+
+*Multi-collinearity* is when more than two inputs are linearly related, and this may not be easily seen in a simple pairwise `cor()` command, but is just as problematic as simple collinearity.  The package `mctest` allows overall and individual multi-collinearity checks.
 
 
 ```r
-car::vif(fullmodel)
+# test the overall model for multicollinearity
+mctest::omcdiag(fullmodel)
 ```
 
 ```
-##        TV     Radio Newspaper 
-##  1.004611  1.144952  1.145187
+## 
+## Call:
+## mctest::omcdiag(mod = fullmodel)
+## 
+## 
+## Overall Multicollinearity Diagnostics
+## 
+##                        MC Results detection
+## Determinant |X'X|:         0.8706         0
+## Farrar Chi-Square:        27.3227         1
+## Red Indicator:             0.2094         0
+## Sum of Lambda Inverse:     3.2948         0
+## Theil's Method:           -1.5365         0
+## Condition Number:          5.7058         0
+## 
+## 1 --&gt; COLLINEARITY is detected by the test 
+## 0 --&gt; COLLINEARITY is not detected by the test
 ```
+
+---
+class: left, middle, r-logo
+
+## Multi-Collinearity (2/2)
+
+
+```r
+# test the inputs for multicollinearity using Variance Inflation Factor
+mctest::imcdiag(fullmodel, method = "VIF")
+```
+
+```
+## 
+## Call:
+## mctest::imcdiag(mod = fullmodel, method = "VIF")
+## 
+## 
+##  VIF Multicollinearity Diagnostics
+## 
+##              VIF detection
+## TV        1.0046         0
+## Radio     1.1450         0
+## Newspaper 1.1452         0
+## 
+## NOTE:  VIF Method Failed to detect multicollinearity
+## 
+## 
+## 0 --&gt; COLLINEARITY is not detected by the test
+## 
+## ===================================
+```
+
+Looks like we are fairly safe.
 
 ---
 class: left, middle, r-logo

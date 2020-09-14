@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Linear Regression for Analysis and Prediction</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Keith McNulty" />
+    <link rel="stylesheet" href="mckpam.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Linear Regression for Analysis and Prediction
+### Keith McNulty
+
+---
+
+
+
+
+class: left, middle, r-logo
+
+## Note on sources
+
+Much of the material in the presentation is sourced from *[An Introduction to Statistical Learning](https://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf)* by James, Witten, Hastie and Tibshirani.
+
+This book is highly recommended for anyone doing statistical modeling or learning.  Linear Regression is the focus of Chapter 3.
+
+All data can be found built in to the R packages mentioned.
+
+
+---
+class: left, middle, r-logo
+
+## What is modeling and why do we do it?
+
+When you model you assume that there is a relationship between some input and some output, and you try to approximate what that relationship is.
+
+We use the term *approximate* because we use samples of data to model a relationship which we believe exists in general.
+
+There are two main reasons why we model:
+
+1.  *Inference/Explanation* -  What factors influence a phenomenon and to what degree (eg, what should I spend advertising money on to improve sales)?
+2.  *Prediction* -  Given new input data, what can I expect from the outcome? (eg, how much sales can I expect if I spend this much on Radio and TV advertising)?
+
+---
+class: left, middle, r-logo
+
+## Speak Math to me
+
+Mathematically, if we have a sample observation with inputs `\(X\)` and outcome `\(Y\)`, we believe that there is a function `\(f\)` such that:
+
+`$$Y = f(X) + \epsilon$$`
+where `\(\epsilon\)` represents some error.  Over sufficiently large data sets, we expect the mean of those errors to converge to zero.
+
+In *parametric* modeling, we hypothesize the nature of the function `\(f\)` (for example, we say it is linear, or quadratic, or sigmoid, or whatever).  The type of model you are using is known as the *inductive bias* of your model.  Linear Regression is a parametric model with a linear inductive bias.
+
+In *non-parametric* modeling we do not hypothesize the nature of the function but rather we use the data to construct the form of `\(f\)`.  K-Nearest Neighbours is an example of a non-parametric modeling technique.
+
+
+
+---
+class: left, middle, r-logo
+
+## Linear Regression
+
+Linear Regression is a parametric modeling technique that assumes that the relationship between the inputs and the outcome is linear in nature.  Recall from high school that the equation of a straight line takes the form:
+
+`$$y = mx + c$$`
+
+where `\(m\)` is the gradient or slope of the line and `\(c\)` is where it intercepts the y axis.  
+
+In *simple linear regression* we only have one input or predictor `\(x_{1}\)`, and the relationship is:
+
+`$$y = \beta_{0} + \beta_{1}x_{1}$$`
+In *multiple linear regression* we have `\(p\)` inputs or predictors `\(x_{1}, x_{2}, ..., x_{p}\)`, and the relationship is:
+
+`$$y = \beta_{0} + \beta_{1}x_{1} + \beta_{2}x_{2} + ... + \beta_{p}x_{p}$$`
+
+---
+class: left, middle, r-logo
+
+## Coefficients and Intercept
+
+Let's take a linear regression model of the form:
+
+`$$y = \beta_{0} + \beta_{1}x_{1} + \beta_{2}x_{2} + ... + \beta_{p}x_{p}$$`
+The terms `\(\beta_{1}, ..., \beta_{p}\)` are called the *coefficients* of the model.  They determine the effect a unit change in each input has on the outcome.  
+
+The term `\(\beta_{0}\)` is called the *intercept* of the model - this represents the base value of the output assuming no inputs.  For example, a product might be expected to have a certain amount of sales even if we didn't do any advertising, and that value would be the intercept of the model.
+
+We don't know the actual value of the coefficients and intercept for the real world problem we are modelling, but we can estimate them with samples of data.  We won't go into the math of that here, but we will dive straight into an example.
+
+---
+class: left, middle, r-logo
+
+## `advertising` data set
+
+The `advertising` dataset records sales in millions of dollars of a product in 200 markets, as well as the amount in thousands of dollars that was spent on advertising on TV, on Radio and in Newspapers.
+
+
+```r
+advertising &lt;- read.csv("advertising.csv")
+
+head(advertising)
+```
+
+```
+##      TV Radio Newspaper Sales
+## 1 230.1  37.8      69.2  22.1
+## 2  44.5  39.3      45.1  10.4
+## 3  17.2  45.9      69.3   9.3
+## 4 151.5  41.3      58.5  18.5
+## 5 180.8  10.8      58.4  12.9
+## 6   8.7  48.9      75.0   7.2
+```
+
+---
+class: left, middle, r-logo
+
+## Simple Linear Regression
+
+Let's just concern ourselves with on predictor to start - we will relate TV advertising to Sales.  Let's plot the data:
+
+
+```r
+library(ggplot2)
+
+ggplot2::ggplot(data = advertising, aes(x = TV, y = Sales)) +
+  geom_point()
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+Look's like a linear relationship is a reasonable hypothesis.
+
+---
+
+class: left, middle, r-logo
+
+## Estimating the intercept and coefficient
+
+The `lm` function takes the formula for the model you want to estimate and calculates the coefficients and a lot of other statistics.  Let's estimate the model for Sales as a function of TV and find out the coefficients and intercept.
+
+
+```r
+TVmodel &lt;- lm(Sales ~ TV, data = advertising)
+
+## this creates a list containing a lot of information
+
+names(TVmodel)
+```
+
+```
+##  [1] "coefficients"  "residuals"     "effects"       "rank"         
+##  [5] "fitted.values" "assign"        "qr"            "df.residual"  
+##  [9] "xlevels"       "call"          "terms"         "model"
+```
+
+```r
+## lets just get the coefficients (including the intercept)
+
+TVmodel$coefficients
+```
+
+```
+## (Intercept)          TV 
+##  7.03259355  0.04753664
+```
+The model has estimated that the product would sell 7.0326 million dollars without any advertising, and for every extra thousand dollars spent on TV, sales would increase by 0.0475 million dollars.
+
+---
+
+class: left, middle, r-logo
+
+## Understanding the error
+
+Remember that we are estimating the relationship based on the data we have, much like we estimate the mean of a population based on a sample from that population.  Let's plot our estimated model on to our dataset.
+
+
+```r
+model_fn = function (x) {
+  beta0 = TVmodel$coefficients[1]
+  beta1 = TVmodel$coefficients[2]
+  
+  beta0 + beta1*x
+}
+
+ggplot2::ggplot(data = advertising, aes(x = TV, y = Sales)) +
+  geom_point() +
+  geom_function(fun = model_fn, colour = "blue")
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+class: left, middle, r-logo
+
+## Residuals and Error
+
+
+&lt;img src="www/residuals.png" alt="Residuals" width="500" height="300" style="float:right"&gt;
+
+As we saw, our estimated model rarely matches the actual value of `\(y\)` exactly.  The difference between each actual value of `\(y\)` and the predicted value (ie our line), is knows as a *residual*.  The `lm` calculates its total error by squaring each residual and adding the squares.  The reason for this is that squaring residuals will penalize larger errors more, so that the model is not overly ignoring outliers.  
+
+The `lm` function selects the line for which this sum of squares error is minimized.  Hence the term *least sum of squares*.
+
+---
+class: left, middle, r-logo
+
+## How 'wrong' might our coefficents be?
+
+Let's now expand our model to a multiple regression based on TV, Radio and Newspaper spend.
+
+Given that our model is an estimation based on the data, we need to know how big the potential error is for our intercept and coefficients.  
+
+Our `lm` function calculates a standard error (SE) for each coefficient.  The higher the number of datapoints, the lower the standard error.  We also know that a 95% confidence interval corresponds to approximately 2 SEs above and below our coefficient.  Let's take a look inside our coefficients using the `summary()` function which provides key statistics about the model:
+
+
+```r
+fullmodel &lt;- lm(Sales ~ TV + Radio + Newspaper, data = advertising)
+(coefs &lt;- summary(fullmodel)$coefficients)
+```
+
+```
+##                 Estimate  Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)  2.938889369 0.311908236  9.4222884 1.267295e-17
+## TV           0.045764645 0.001394897 32.8086244 1.509960e-81
+## Radio        0.188530017 0.008611234 21.8934961 1.505339e-54
+## Newspaper   -0.001037493 0.005871010 -0.1767146 8.599151e-01
+```
+
+---
+class: left, middle, r-logo
+
+## Is a predictor significant?
+
+
+```r
+coefs
+```
+
+```
+##                 Estimate  Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)  2.938889369 0.311908236  9.4222884 1.267295e-17
+## TV           0.045764645 0.001394897 32.8086244 1.509960e-81
+## Radio        0.188530017 0.008611234 21.8934961 1.505339e-54
+## Newspaper   -0.001037493 0.005871010 -0.1767146 8.599151e-01
+```
+
+For a predictor to be significant, we want to be reasonably sure that it won't have a coefficient of zero.  For 95% confidence, we can subtract and add two standard errors and check if zero is contained in this 'confidence interval'.  You can also reference the final column, which will indicate a p-value of &lt; 0.05 if zero is not contained in this confidence interval.
+
+So we can conclude that TV and Radio are significant predictors, but Newspapers are not.
+
+
+---
+class: left, middle, r-logo
+
+## How good is the overall model?
+
+Recall that the model calculates its error as the sum of squares of the residuals (or errors) for each datapoint - known as the residual sum of squares or RSS.  We can average this to get an average RSS error for each datapoint -  `\(\frac{\mathrm{RSS}}{n}\)`.  We also know that the y values in our dataset have a variance `\(\mathrm{Var}(y)\)` around a mean.  
+
+Therefore the proportion of this variance which is explained by the error is equal to:
+
+`$$\frac{\mathrm{RSS}}{n\mathrm{Var}(y)}$$`
+This means that the amount of the variance that is not error, and hence explained by our model is:
+
+`$$R^{2} = 1 - \frac{\mathrm{RSS}}{n\mathrm{Var}(y)}$$`
+
+You can see that as `\(n\)` gets bigger you'd expect models with approximately the same RSS to have a higher `\(R^{2}\)`, which makes sense.
+
+**Interesting fact:** In a simple regression model, where `\(r\)` is the correlation between `\(x\)` and `\(y\)`, we have `\(R^{2} = r^{2}\)`.  
+
+---
+class: left, middle, r-logo
+
+## Graphical illustration of `\(R^{2}\)` for our single regression
+
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+Here we have plotted the mean of `\(y\)` in red.  That line simply explains that y is a random variable with a mean.
+
+Our fitted model is in blue.  As we move from the red line to the blue line, we start to better explain the phenomenon and reduce the residual errors from the red line until we settle on our model.  
+
+The `\(R^{2}\)` effectively tells us by what proportion we have reduced the error in the model from that which you would expect of a random variable.  
+
+---
+class: left, middle, r-logo
+
+## How good is the fit of our model on the advertising data?
+
+
+```r
+summary(fullmodel)$r.squared
+```
+
+```
+## [1] 0.8972106
+```
+
+We can see that we have explained about 90% of the variance in our outcome.  
+
+That's good, but could it be better?
+
+---
+class: left, middle, r-logo
+
+## Interaction terms
+
+In everything we have done, we've made the critical assumption that there is no interaction between our input predictors.  That is, we've assumed that Radio, TV and Newspaper advertising spend act independently of each other on Sales. No matter how much we spend on TV, for example, each $ spent on Radio will still have the same effect. That's a big assumption.  Maybe TV advertising has greater effect if people have heard of the product on the Radio too?
+
+We can model for interactions by putting them into our formula in the `lm` function:
+
+
+```r
+model_interact &lt;- lm(Sales ~ TV + Radio + TV:Radio, data = advertising)
+
+summary(model_interact)$coefficients
+```
+
+```
+##                Estimate   Std. Error   t value     Pr(&gt;|t|)
+## (Intercept) 6.750220203 0.2478713699 27.232755 1.541461e-68
+## TV          0.019101074 0.0015041455 12.698953 2.363605e-27
+## Radio       0.028860340 0.0089052729  3.240815 1.400461e-03
+## TV:Radio    0.001086495 0.0000524204 20.726564 2.757681e-51
+```
+
+This tells us that in addition to the independent effects of TV and Radio, every thousand dollars spent on radio further boost sales driven by TV, and that this effect is significant.  Further, the `\(R^{2}\)` of this model is 0.97, which is even better than our prior model.
+
+---
+class: left, middle, r-logo
+
+## Predicting using Linear Regression
+
+Your Linear Regression model can now act to predict new instances of data.  If someone wanted to know the likely sales given a certain amount of advertising spend on each media, our model can now provide an estimate.
+
+Let's take an observation example out of our model and retrain on the remaining - it won't make much difference to the fit.  Then we can ask our model to predict the one we left out.
+
+
+```r
+set.seed(12345)
+grab_row &lt;- sample(1:nrow(advertising), 1)
+
+advertising_fit &lt;- advertising[-grab_row, ] 
+advertising_test &lt;- advertising[grab_row, ] 
+
+model &lt;- lm(Sales ~ TV + Radio + TV:Radio, data = advertising_fit)
+
+(test &lt;- data.frame(prediction = predict(model, advertising_test),
+                    actual = advertising_test$Sales))
+```
+
+```
+##     prediction actual
+## 142   18.91895   19.2
+```
+
+
+
+
+---
+class: left, middle, r-logo
+
+## In real life, what error should we expect around the prediction
+
+You would be mad to bet on an exact figure, you'll want to give a range.
+
+Maybe that range is the 95% confidence interval?
+
+
+```r
+predict(model, advertising_test, interval = "confidence")
+```
+
+```
+##          fit      lwr      upr
+## 142 18.91895 18.72942 19.10849
+```
+
+You'd miss the target of 19.2 if you went with that.  
+
+Why did that happen?
+
+---
+class: left, middle, r-logo
+
+## Inductive Bias and Error
+
+Recall how we started this session, observing that for any outcome value `\(Y\)`, our model assumes that
+
+`$$Y = f(X) + \epsilon$$`
+for some error `\(\epsilon\)`.
+
+The focus of all our work in this talk was to approximate `\(f(X)\)` using a linear inductive bias, and the confidence interval in our prediction is formed from the confidence intervals of the coefficients in our linear model.  
+
+However, we forgot about two things:
+
+1.  Maybe the real `\(f(X)\)` is *not quite linear*
+2.  Even if it was, we still have `\(\epsilon\)` which we cannot do anything about.  
+
+---
+class: left, middle, r-logo
+
+## Prediction Interval
+
+We can use a prediction interval to provide a better estimate of the range of possible values:
+
+
+```r
+predict(model, advertising_test, interval = "prediction")
+```
+
+```
+##          fit     lwr      upr
+## 142 18.91895 17.0442 20.79371
+```
+
+Note the substantially wider range includes our true value of 19.2.  With a prediction interval you can say that the 'Sales are 95% likely to fall in this range'.
+
+---
+class: left, middle, r-logo
+
+## Collinearity and Multi-collinearity
+
+These issues artifically inflate the variance of a dataset, which can render estimation inaccurate.
+
+*Collinearity* is when two inputs are highly correlated (eg &gt; 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be consider for removal:
+
+
+```r
+cor(advertising[ ,1:3 ])
+```
+
+```
+##                   TV      Radio  Newspaper
+## TV        1.00000000 0.05480866 0.05664787
+## Radio     0.05480866 1.00000000 0.35410375
+## Newspaper 0.05664787 0.35410375 1.00000000
+```
+
+*Multi-collinearity* is when more than two inputs are linearly related, and this may not be seen in a simple pairwise `cor()` command.  For this, you need to compute a *Variance Inflation Factor* (VIF) on a model with all your inputs and consider dropping inputs with a VIF greater than 5.
+
+
+```r
+car::vif(fullmodel)
+```
+
+```
+##        TV     Radio Newspaper 
+##  1.004611  1.144952  1.145187
+```
+
+---
+class: left, middle, r-logo
+
+
+## Other things to consider in Linear Regression
+
+1.  **Categorical data**:  Not recommended to use Linear Regression to predict a categorical outcome (use Logistic Regression), but categorical inputs are fine as long as they are converted to dummy variables.  
+2.  **Non-linear relationships**:  Can be modelled using a Linear Regression model, but with terms that are powers of the inputs, e.g., `\(\texttt{mpg} = \beta_{0} + \beta_{1}\times\texttt{horsepower} + \beta_{2}\times\texttt{horsepower}^{2}\)`.
+3.  **Outliers** (extreme values of `\(y\)`) and **High Leverage Points** (extreme values of `\(x_{i}\)`):  These should be removed if deemed safe to do so, particularly if they are a known error or exceptional case of the phenomenon being modeled.
+
+
+---
+class: center, middle, r-logo
+
+# Thank you! Questions?
+
+## Next time: From Linear to Logistic Regression for Binary Outcomes
+
+&lt;img src="www/lineartologistic.png" alt="Residuals" width="800" height="300"&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

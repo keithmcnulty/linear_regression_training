@@ -13,6 +13,8 @@ output:
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
 ```
 
 class: left, middle, r-logo
@@ -23,7 +25,7 @@ Much of the material in the presentation is sourced from *[An Introduction to St
 
 This book is highly recommended for anyone doing statistical modeling or learning.  Linear Regression is the focus of Chapter 3.
 
-The dataset used can be found [on my Github]().
+The dataset used can be found [on my Github](https://raw.githubusercontent.com/keithmcnulty/linear_regression_training/master/advertising.csv).
 
 
 ---
@@ -96,7 +98,9 @@ class: left, middle, r-logo
 The `advertising` dataset records sales in millions of dollars of a product in 200 markets, as well as the amount in thousands of dollars that was spent on advertising on TV, on Radio and in Newspapers.
 
 ```{r}
-advertising <- read.csv("advertising.csv")
+library(readr)
+url <- "https://raw.githubusercontent.com/keithmcnulty/linear_regression_training/master/advertising.csv"
+advertising <- readr::read_csv(url)
 
 head(advertising)
 
@@ -107,7 +111,7 @@ class: left, middle, r-logo
 
 ## Simple Linear Regression
 
-Let's just concern ourselves with on predictor to start - we will relate TV advertising to Sales.  Let's plot the data:
+Let's just concern ourselves with one predictor to start - we will relate TV advertising to Sales.  Let's plot the data:
 
 ```{r, fig.height = 3, fig.align = "center"}
 library(ggplot2)
@@ -364,7 +368,7 @@ class: left, middle, r-logo
 
 These issues artifically inflate the variance of a dataset, which can render estimation inaccurate.
 
-*Collinearity* is when two inputs are highly correlated (eg > 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be consider for removal:
+*Collinearity* is when two inputs are highly correlated (eg > 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be considered for removal:
 
 ```{r}
 cor(advertising[ ,1:3 ])

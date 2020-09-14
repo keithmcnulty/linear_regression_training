@@ -26,7 +26,7 @@ Much of the material in the presentation is sourced from *[An Introduction to St
 
 This book is highly recommended for anyone doing statistical modeling or learning.  Linear Regression is the focus of Chapter 3.
 
-All data can be found built in to the R packages mentioned.
+The dataset used can be found [on my Github](https://raw.githubusercontent.com/keithmcnulty/linear_regression_training/master/advertising.csv).
 
 
 ---
@@ -100,19 +100,23 @@ The `advertising` dataset records sales in millions of dollars of a product in 2
 
 
 ```r
-advertising &lt;- read.csv("advertising.csv")
+library(readr)
+url &lt;- "https://raw.githubusercontent.com/keithmcnulty/linear_regression_training/master/advertising.csv"
+advertising &lt;- readr::read_csv(url)
 
 head(advertising)
 ```
 
 ```
+## # A tibble: 6 x 4
 ##      TV Radio Newspaper Sales
-## 1 230.1  37.8      69.2  22.1
+##   &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 230.   37.8      69.2  22.1
 ## 2  44.5  39.3      45.1  10.4
 ## 3  17.2  45.9      69.3   9.3
-## 4 151.5  41.3      58.5  18.5
-## 5 180.8  10.8      58.4  12.9
-## 6   8.7  48.9      75.0   7.2
+## 4 152.   41.3      58.5  18.5
+## 5 181.   10.8      58.4  12.9
+## 6   8.7  48.9      75     7.2
 ```
 
 ---
@@ -120,7 +124,7 @@ class: left, middle, r-logo
 
 ## Simple Linear Regression
 
-Let's just concern ourselves with on predictor to start - we will relate TV advertising to Sales.  Let's plot the data:
+Let's just concern ourselves with one predictor to start - we will relate TV advertising to Sales.  Let's plot the data:
 
 
 ```r
@@ -351,8 +355,8 @@ model &lt;- lm(Sales ~ TV + Radio + TV:Radio, data = advertising_fit)
 ```
 
 ```
-##     prediction actual
-## 142   18.91895   19.2
+##   prediction actual
+## 1   18.91895   19.2
 ```
 
 
@@ -373,8 +377,8 @@ predict(model, advertising_test, interval = "confidence")
 ```
 
 ```
-##          fit      lwr      upr
-## 142 18.91895 18.72942 19.10849
+##        fit      lwr      upr
+## 1 18.91895 18.72942 19.10849
 ```
 
 You'd miss the target of 19.2 if you went with that.  
@@ -411,8 +415,8 @@ predict(model, advertising_test, interval = "prediction")
 ```
 
 ```
-##          fit     lwr      upr
-## 142 18.91895 17.0442 20.79371
+##        fit     lwr      upr
+## 1 18.91895 17.0442 20.79371
 ```
 
 Note the substantially wider range includes our true value of 19.2.  With a prediction interval you can say that the 'Sales are 95% likely to fall in this range'.
@@ -424,7 +428,7 @@ class: left, middle, r-logo
 
 These issues artifically inflate the variance of a dataset, which can render estimation inaccurate.
 
-*Collinearity* is when two inputs are highly correlated (eg &gt; 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be consider for removal:
+*Collinearity* is when two inputs are highly correlated (eg &gt; 0.5).  This can be identified with a simple `cor()` command and one of these inputs should be considered for removal:
 
 
 ```r

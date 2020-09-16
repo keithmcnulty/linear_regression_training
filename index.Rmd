@@ -27,6 +27,10 @@ This book is highly recommended for anyone doing statistical modeling or learnin
 
 The dataset used can be found [on my Github](https://raw.githubusercontent.com/keithmcnulty/linear_regression_training/master/advertising.csv).
 
+## Note on languages
+
+This document is coded in R.  I've written a Python notebook [here](https://github.com/keithmcnulty/linear_regression_training/blob/master/linear_regression_training.ipynb) with the code to do the same operations that you find in this document.
+
 
 ---
 class: left, middle, r-logo

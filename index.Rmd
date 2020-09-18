@@ -289,7 +289,7 @@ summary(model_interact)$coefficients
 
 ```
 
-This tells us that in addition to the independent effects of TV and Radio, every thousand dollars spent on TV and Radio further boost sales driven, and that this effect is significant.  Further, the $R^{2}$ of this model is `r round(summary(model_interact)$r.squared, 2)`, which is even better than our prior model.
+This tells us that - in addition to the independent effects of TV and Radio - every thousand dollars spent on TV and Radio *together* further boost sales, and that this effect is significant.  Further, the $R^{2}$ of this model is `r round(summary(model_interact)$r.squared, 2)`, which is even better than our prior model.
 
 ---
 class: left, middle, r-logo
